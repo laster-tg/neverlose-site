@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#061a2c" />
+  <meta name="description" content="Neverlose — программное обеспечение с гибкой настройкой и поддержкой сообщества." />
+  <title>NEVERLOSE.CC</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2306192b'/%3E%3Cpath d='M13 46V18h8l15 17V18h9v28h-8L22 29v17z' fill='%2300b8dc'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="site-logo" href="#home" aria-label="Главная"><img src="logo.png" alt="Neverlose" /></a>
+    <nav class="main-nav" aria-label="Основная навигация">
+      <a href="#home" data-route="home">Главная</a>
+      <a href="#forum" data-route="forum">Форум</a>
+      <a href="#market" data-route="market">Маркет</a>
+      <a href="#help" data-route="help">Справка</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="language" type="button">RU <span>⌄</span></button>
+      <button class="text-button" data-auth-open="register" type="button">Регистрация</button>
+      <button class="text-button login-button" data-auth-open="login" type="button">Вход</button>
+      <button class="profile-button hidden" id="profileButton" type="button"><span class="avatar">N</span><span id="profileName">Профиль</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page active" data-page="home">
+      <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-shade"></div>
+        <div class="hero-content reveal">
+          <h1 class="brand"><span>NEVERLOSE</span><b>.CC</b></h1>
+          <p>Уникальное ПО с <strong>огромным функционалом</strong> и <strong>отзывчивой командой техподдержки.</strong></p>
+          <a class="primary-cta" href="#products">НАШИ ПРОДУКТЫ</a>
+        </div>
+      </section>
+
+      <section class="products" id="products">
+        <article class="product-card product-cs2">
+          <div class="product-copy">
+            <span class="eyebrow">NEVERLOSE</span>
+            <h2>Neverlose for CS2</h2>
+            <p>Third-party software for Counter-Strike 2</p>
+            <button class="outline-cta" data-product="CS2">ПОДРОБНЕЕ / КУПИТЬ</button>
+          </div>
+        </article>
+        <article class="product-card product-csgo">
+          <div class="product-copy">
+            <span class="eyebrow">LEGACY</span>
+            <h2>Neverlose for CS:GO</h2>
+            <p>Third-party software for Counter-Strike: Global Offensive</p>
+            <button class="outline-cta" data-product="CS:GO">ПОДРОБНЕЕ / КУПИТЬ</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="features section-shell">
+        <div class="section-kicker">ПОЧЕМУ МЫ</div>
+        <h2>Всё необходимое в одном аккаунте</h2>
+        <div class="feature-grid">
+          <article><span class="feature-icon">◈</span><h3>Удобный сайт</h3><p>Управляйте подписками, загрузками и HWID с единой страницы профиля.</p></article>
+          <article><span class="feature-icon">✦</span><h3>Обширный функционал</h3><p>Гибкая настройка, визуальные функции и регулярно обновляемые конфигурации.</p></article>
+          <article><span class="feature-icon">◎</span><h3>Настраиваемый вид</h3><p>Стили и элементы интерфейса можно адаптировать под собственные предпочтения.</p></article>
+          <article><span class="feature-icon">◇</span><h3>Техподдержка</h3><p>База знаний, обращения и ответы сообщества доступны из личного кабинета.</p></article>
+          <article><span class="feature-icon">⌁</span><h3>Сообщество</h3><p>Обсуждения, публикации конфигураций и новости обновлений на форуме.</p></article>
+          <article><span class="feature-icon">⬡</span><h3>Единый дизайн</h3><p>Знакомый тёмный интерфейс одинаково удобен на компьютере и телефоне.</p></article>
+        </div>
+      </section>
+    </section>
+
+    <section class="page inner-page" data-page="forum">
+      <div class="inner-hero"><span>COMMUNITY</span><h1>Форум</h1><p>Новости, обсуждения, конфигурации и помощь сообщества.</p></div>
+      <div class="forum-layout section-shell">
+        <div class="forum-main">
+          <div class="panel-title"><h2>Разделы</h2><button class="small-cta" data-protected-action="new-topic">Новая тема</button></div>
+          <article class="forum-row"><div class="forum-mark">N</div><div><h3>Новости и обновления</h3><p>Официальные объявления и журналы изменений.</p></div><span>128 тем</span></article>
+          <article class="forum-row"><div class="forum-mark">C</div><div><h3>Конфигурации</h3><p>Делитесь настройками и обсуждайте готовые сборки.</p></div><span>2 416 тем</span></article>
+          <article class="forum-row"><div class="forum-mark">S</div><div><h3>Поддержка</h3><p>Решение технических вопросов и рекомендации.</p></div><span>907 тем</span></article>
+        </div>
+        <aside class="side-panel"><h3>Сейчас онлайн</h3><strong>1 284</strong><p>участника за последние 15 минут</p><div class="online-line"><i></i><span>Сервисы работают штатно</span></div></aside>
+      </div>
+    </section>
+
+    <section class="page inner-page" data-page="market">
+      <div class="inner-hero market-hero"><span>COMMUNITY CLOUD</span><h1>Маркет</h1><p>Облачные конфиги и Lua-скрипты сообщества.</p></div>
+      <div class="market-shell section-shell">
+        <div class="market-toolbar">
+          <div class="market-tabs" role="tablist"><button class="active" data-market-tab="config">Конфиги</button><button data-market-tab="lua">Lua</button></div>
+          <label class="market-search"><span>⌕</span><input id="marketSearch" type="search" placeholder="Поиск по маркету" /></label>
+          <button class="small-cta" id="uploadMarketButton" type="button">Загрузить</button>
+        </div>
+        <div class="market-meta"><span id="marketCount">0 материалов</span><button id="marketRefresh" type="button">Обновить</button></div>
+        <div class="market-grid" id="marketGrid" aria-live="polite"></div>
+        <div class="market-empty hidden" id="marketEmpty"><strong>Здесь пока пусто</strong><span>Загрузите первый материал сообщества.</span></div>
+      </div>
+    </section>
+
+    <section class="page inner-page" data-page="help">
+      <div class="inner-hero"><span>SUPPORT CENTER</span><h1>Справка</h1><p>Быстрые ответы и инструкции по работе с аккаунтом.</p></div>
+      <div class="help-grid section-shell">
+        <article class="help-card"><span>01</span><h3>Начало работы</h3><p>Регистрация, подтверждение почты, установка и первый запуск.</p><button data-help="start">Открыть</button></article>
+        <article class="help-card"><span>02</span><h3>Аккаунт и безопасность</h3><p>Пароль, двухфакторная защита, активные сессии и восстановление.</p><button data-help="security">Открыть</button></article>
+        <article class="help-card"><span>03</span><h3>Подписка и HWID</h3><p>Состояние подписки, устройства и правила сброса привязки.</p><button data-help="subscription">Открыть</button></article>
+        <article class="help-card"><span>04</span><h3>Технические вопросы</h3><p>Типовые ошибки запуска, обновления и диагностика.</p><button data-help="technical">Открыть</button></article>
+      </div>
+    </section>
+
+    <section class="page inner-page" data-page="account">
+      <div class="dashboard section-shell">
+        <aside class="dashboard-nav">
+          <div class="large-avatar">N</div><h2 id="dashboardName">Пользователь</h2><p id="dashboardEmail">email@example.com</p>
+          <button class="active">Обзор</button><button>Подписки</button><button>Безопасность</button><button id="signOutButton">Выйти</button>
+        </aside>
+        <div class="dashboard-content">
+          <div class="dashboard-heading"><div><span>ЛИЧНЫЙ КАБИНЕТ</span><h1>Добро пожаловать</h1></div><span class="status-pill">● Аккаунт активен</span></div>
+          <div class="stat-grid"><article><span>Подписка</span><strong>Не активна</strong><button data-product="CS2">Выбрать продукт</button></article><article><span>HWID</span><strong id="hwidStatus">Не привязан</strong><button id="resetHwidButton">Сбросить HWID</button></article><article><span>Безопасность</span><strong>Email подтверждён</strong><button id="resetPasswordButton">Сменить пароль</button></article></div>
+          <section class="activity-panel"><h2>Последние действия</h2><div class="activity-row"><i></i><div><strong>Вход в аккаунт</strong><span id="lastLogin">Только что</span></div></div></section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="site-logo footer-logo" href="#home"><img src="logo.png" alt="Neverlose" /></a>
+    <div class="footer-links"><a href="#help">Справка</a><a href="#terms">Условия использования</a><a href="#privacy">Политика конфиденциальности</a><a href="#developers">Для разработчиков</a><a href="mailto:support@example.com">Контакты</a></div>
+    <p>© 2026. Независимый демонстрационный проект. Не связан с Valve Corporation.</p>
+  </footer>
+
+  <div class="modal-backdrop hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="auth-modal">
+      <button class="modal-close" id="authClose" aria-label="Закрыть">×</button>
+      <img class="auth-logo" src="logo.png" alt="Neverlose" />
+      <div class="auth-tabs hidden"><button data-auth-tab="login" class="active">Вход</button><button data-auth-tab="register">Регистрация</button></div>
+      <form id="loginForm" class="auth-form active">
+        <h2 id="authTitle" class="sr-only">Вход</h2>
+        <label class="sr-only">Логин или email</label><input name="email" type="text" autocomplete="username" required placeholder="Логин" />
+        <label class="sr-only">Пароль</label><input name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="Пароль" />
+        <div class="captcha-mock"><span class="captcha-box"></span><span>Я не робот</span><b>↻<small>reCAPTCHA</small></b></div>
+        <button class="submit-button" type="submit">ЛОГИН</button>
+        <div class="auth-links"><button class="link-button" id="forgotButton" type="button">Забыли пароль?</button><button class="link-button" type="button">Не пришло письмо активации?</button><button class="link-button" data-switch-register type="button">Нет учетной записи? <span>Регистрация</span></button></div>
+      </form>
+      <form id="registerForm" class="auth-form">
+        <h2 class="sr-only">Регистрация</h2>
+        <label class="sr-only">Логин</label><input name="username" type="text" required minlength="3" maxlength="24" placeholder="Логин" />
+        <label class="sr-only">Пароль</label><input name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="Пароль" />
+        <label class="sr-only">Электронная почта</label><input name="email" type="email" autocomplete="email" required placeholder="Электронная почта" />
+        <div class="captcha-mock"><span class="captcha-box"></span><span>Я не робот</span><b>↻<small>reCAPTCHA</small></b></div>
+        <div class="legal-checks"><label class="checkbox"><input name="terms" type="checkbox" required />Я согласен с <a href="#terms">условиями использования</a></label><label class="checkbox"><input type="checkbox" required />Я согласен с <a href="#terms">договором оферты</a></label><label class="checkbox"><input type="checkbox" required />Я согласен с <a href="#privacy">политикой конфиденциальности</a></label></div>
+        <button class="submit-button" type="submit">РЕГИСТРАЦИЯ</button>
+        <div class="auth-links"><button class="link-button" data-switch-login type="button">Уже есть аккаунт? <span>Вход</span></button></div>
+      </form>
+      <form id="forgotForm" class="auth-form">
+        <h2>Восстановление</h2><p>Мы отправим ссылку для смены пароля.</p>
+        <label>Email<input name="email" type="email" autocomplete="email" required placeholder="name@example.com" /></label>
+        <button class="submit-button" type="submit">ОТПРАВИТЬ ССЫЛКУ</button>
+        <button class="link-button back-login" type="button">Вернуться ко входу</button>
+      </form>
+      <div class="form-message" id="formMessage" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="infoModal" role="dialog" aria-modal="true">
+    <div class="info-modal"><button class="modal-close" data-info-close aria-label="Закрыть">×</button><span class="section-kicker" id="infoKicker">NEVERLOSE</span><h2 id="infoTitle"></h2><p id="infoText"></p><button class="submit-button" data-info-close>ПОНЯТНО</button></div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+    <form class="info-modal upload-modal" id="marketUploadForm">
+      <button class="modal-close" id="uploadClose" type="button" aria-label="Закрыть">×</button>
+      <span class="section-kicker">COMMUNITY CLOUD</span><h2 id="uploadTitle">Загрузить материал</h2>
+      <label>Название<input name="title" required minlength="3" maxlength="60" placeholder="Название конфига или Lua" /></label>
+      <label>Описание<textarea name="description" required minlength="3" maxlength="240" placeholder="Кратко опишите материал"></textarea></label>
+      <label>Тип<select name="kind"><option value="config">Конфиг</option><option value="lua">Lua</option></select></label>
+      <label>Файл<input name="file" type="file" required accept=".cfg,.json,.txt,.lua" /></label>
+      <button class="submit-button" type="submit">ЗАГРУЗИТЬ В ОБЛАКО</button>
+      <div class="form-message" id="uploadMessage" aria-live="polite"></div>
+    </form>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status"></div>
+  <script src="config.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
