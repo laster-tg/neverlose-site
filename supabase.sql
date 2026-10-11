@@ -57,7 +57,14 @@ on conflict (id) do update set file_size_limit = excluded.file_size_limit;
 
 create policy "market storage upload own" on storage.objects for insert to authenticated
 with check (bucket_id = 'market' and (storage.foldername(name))[1] = auth.uid()::text);
-create policy "market storage read signed in" on storage.objects for select to authenticated using (bucket_id = 'market');
+drop policy if exists "market storage read signed in" on storage.objects;
+drop policy if exists "market storage read own or published" on storage.objects;
+create policy "market storage read own or published" on storage.objects for select to authenticated using (
+  bucket_id = 'market' and (
+    (storage.foldername(name))[1] = auth.uid()::text
+    or exists (select 1 from public.market_items item where item.storage_path = name and item.published = true)
+  )
+);
 create policy "market storage delete own" on storage.objects for delete to authenticated
 using (bucket_id = 'market' and (storage.foldername(name))[1] = auth.uid()::text);
 

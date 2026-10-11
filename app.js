@@ -6,6 +6,8 @@ const supabase = configured ? createClient(config.supabaseUrl, config.supabaseAn
 let currentUser = null;
 let marketKind = 'config';
 let marketItems = [];
+let installDirectory = null;
+let cloudItems = [];
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -23,13 +25,14 @@ function route() {
     openAuth('login');
   }
   if (page === 'market') loadMarket();
+  if (page === 'account' && currentUser) loadMyCloud();
   window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function marketCard(item) {
   const safeTitle = String(item.title || '').replace(/[<>]/g, '');
   const safeDescription = String(item.description || '').replace(/[<>]/g, '');
-  return `<article class="market-card"><div class="market-card-top"><span class="file-badge">${item.kind === 'lua' ? 'LUA' : 'CFG'}</span><span>${new Date(item.created_at).toLocaleDateString('ru-RU')}</span></div><h3>${safeTitle}</h3><p>${safeDescription}</p><div class="market-card-foot"><span>↓ ${Number(item.downloads || 0)}</span><button data-download-id="${item.id}" data-path="${item.storage_path}">Скачать</button></div></article>`;
+  return `<article class="market-card"><div class="market-card-top"><span class="file-badge">${item.kind === 'lua' ? 'LUA' : 'CFG'}</span><span>${new Date(item.created_at).toLocaleDateString('ru-RU')}</span></div><h3>${safeTitle}</h3><p>${safeDescription}</p><div class="market-card-foot"><span>↓ ${Number(item.downloads || 0)}</span><div class="card-actions"><button class="download-button" data-download-id="${item.id}" data-path="${item.storage_path}" title="Скачать файл">↓</button><button class="install-button" data-install-id="${item.id}">Установить</button></div></div></article>`;
 }
 
 function renderMarket() {
@@ -39,6 +42,106 @@ function renderMarket() {
   $('#marketCount').textContent = `${list.length} ${list.length === 1 ? 'материал' : 'материалов'}`;
   $('#marketEmpty').classList.toggle('hidden', list.length !== 0);
   $$('[data-download-id]').forEach((button) => button.addEventListener('click', () => downloadMarketItem(button)));
+  $$('[data-install-id]').forEach((button) => button.addEventListener('click', () => installMarketItem(button)));
+}
+
+function openInstallDb() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('aero-nl-cloud', 1);
+    request.onupgradeneeded = () => request.result.createObjectStore('handles');
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function rememberDirectory(handle) {
+  const db = await openInstallDb();
+  await new Promise((resolve, reject) => {
+    const request = db.transaction('handles', 'readwrite').objectStore('handles').put(handle, 'nl-cloud');
+    request.onsuccess = resolve;
+    request.onerror = () => reject(request.error);
+  });
+  db.close();
+}
+
+async function restoreDirectory() {
+  if (!('showDirectoryPicker' in window)) {
+    $('#folderStatus').textContent = 'Установка поддерживается в Chrome/Edge';
+    $('#connectFolderButton').disabled = true;
+    return;
+  }
+  try {
+    const db = await openInstallDb();
+    installDirectory = await new Promise((resolve, reject) => {
+      const request = db.transaction('handles').objectStore('handles').get('nl-cloud');
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+  } catch (_) {
+    installDirectory = null;
+  }
+  updateFolderStatus();
+}
+
+function updateFolderStatus() {
+  $('#folderStatus').textContent = installDirectory ? `Подключено: ${installDirectory.name}` : 'Папка установки не выбрана';
+  $('#connectFolderButton').textContent = installDirectory ? 'Сменить папку' : 'Подключить NL Cloud';
+}
+
+async function connectInstallFolder() {
+  if (!('showDirectoryPicker' in window)) return showToast('Откройте сайт в Chrome или Edge для прямой установки');
+  try {
+    installDirectory = await window.showDirectoryPicker({ id: 'neverlose-cloud', mode: 'readwrite' });
+    await rememberDirectory(installDirectory);
+    updateFolderStatus();
+    showToast('NL Cloud подключён. Теперь доступна установка в один клик');
+    return installDirectory;
+  } catch (error) {
+    if (error.name !== 'AbortError') showToast(`Не удалось подключить папку: ${error.message}`);
+    return null;
+  }
+}
+
+async function ensureDirectoryPermission(handle) {
+  const options = { mode: 'readwrite' };
+  if ((await handle.queryPermission(options)) === 'granted') return true;
+  return (await handle.requestPermission(options)) === 'granted';
+}
+
+async function installMarketItem(button) {
+  if (!currentUser) return openAuth('login');
+  if (!supabase) return showToast('Подключите Supabase для установки материалов');
+  const item = marketItems.find((entry) => Number(entry.id) === Number(button.dataset.installId));
+  if (!item) return showToast('Материал не найден');
+  let root = installDirectory;
+  if (!root) root = await connectInstallFolder();
+  if (!root || !(await ensureDirectoryPermission(root))) return showToast('Нужен доступ к папке nl_cloud');
+
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Установка…';
+  try {
+    const { data: blob, error } = await supabase.storage.from('market').download(item.storage_path);
+    if (error) throw error;
+    const folderName = item.kind === 'lua' ? 'scripts' : 'configs';
+    const folder = await root.getDirectoryHandle(folderName, { create: true });
+    const fallback = `${item.title}.${item.kind === 'lua' ? 'lua' : 'cfg'}`;
+    const safeName = String(item.file_name || fallback).replace(/[^a-zA-Z0-9а-яА-ЯёЁ._ -]/g, '_');
+    const file = await folder.getFileHandle(safeName, { create: true });
+    const writable = await file.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    await supabase.rpc('increment_market_download', { item_id: Number(item.id) });
+    item.downloads = Number(item.downloads || 0) + 1;
+    button.textContent = 'Установлено ✓';
+    showToast(`${item.kind === 'lua' ? 'Lua' : 'Конфиг'} установлен в ${root.name}/${folderName}`);
+  } catch (error) {
+    button.textContent = originalText;
+    showToast(`Ошибка установки: ${error.message}`);
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function loadMarket() {
@@ -60,6 +163,58 @@ async function downloadMarketItem(button) {
   if (error) return showToast(error.message);
   await supabase.rpc('increment_market_download', { item_id: Number(button.dataset.downloadId) });
   location.href = data.signedUrl;
+}
+
+function formatBytes(bytes) {
+  if (!bytes) return '0 Б';
+  const units = ['Б', 'КБ', 'МБ'];
+  let value = Number(bytes);
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) { value /= 1024; unit += 1; }
+  return `${value.toFixed(unit ? 1 : 0)} ${units[unit]}`;
+}
+
+function cloudCard(item) {
+  const title = String(item.title || '').replace(/[<>]/g, '');
+  return `<article class="cloud-row"><span class="file-badge">${item.kind === 'lua' ? 'LUA' : 'CFG'}</span><div><strong>${title}</strong><small>${item.published ? 'Опубликован в Market' : 'Приватный файл'} · ${formatBytes(item.file_size)}</small></div><button data-cloud-install="${item.id}">Установить</button><button class="danger-button" data-cloud-delete="${item.id}">Удалить</button></article>`;
+}
+
+function renderMyCloud() {
+  $('#cloudList').innerHTML = cloudItems.map(cloudCard).join('');
+  $('#cloudEmpty').classList.toggle('hidden', cloudItems.length > 0);
+  $('#cloudCount').textContent = `${cloudItems.length} файлов`;
+  $('#cloudUsage').textContent = `${formatBytes(cloudItems.reduce((sum, item) => sum + Number(item.file_size || 0), 0))} использовано`;
+  $$('[data-cloud-install]').forEach((button) => button.addEventListener('click', () => {
+    const item = cloudItems.find((entry) => Number(entry.id) === Number(button.dataset.cloudInstall));
+    if (!item) return;
+    if (!marketItems.some((entry) => Number(entry.id) === Number(item.id))) marketItems.push(item);
+    button.dataset.installId = item.id;
+    installMarketItem(button);
+  }));
+  $$('[data-cloud-delete]').forEach((button) => button.addEventListener('click', () => deleteCloudItem(button)));
+}
+
+async function loadMyCloud() {
+  if (!currentUser || !supabase) { cloudItems = []; renderMyCloud(); return; }
+  const { data, error } = await supabase.from('market_items').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  if (error) return showToast(error.message);
+  cloudItems = data || [];
+  renderMyCloud();
+}
+
+async function deleteCloudItem(button) {
+  const item = cloudItems.find((entry) => Number(entry.id) === Number(button.dataset.cloudDelete));
+  if (!item || !confirm(`Удалить «${item.title}» из облака?`)) return;
+  button.disabled = true;
+  const removedFile = await supabase.storage.from('market').remove([item.storage_path]);
+  if (removedFile.error) { button.disabled = false; return showToast(removedFile.error.message); }
+  const removedRow = await supabase.from('market_items').delete().eq('id', item.id).eq('user_id', currentUser.id);
+  if (removedRow.error) { button.disabled = false; return showToast(removedRow.error.message); }
+  cloudItems = cloudItems.filter((entry) => entry.id !== item.id);
+  marketItems = marketItems.filter((entry) => entry.id !== item.id);
+  renderMyCloud();
+  renderMarket();
+  showToast('Файл удалён из облака');
 }
 
 function openAuth(tab = 'login') {
@@ -118,6 +273,7 @@ function updateSession(user) {
   $('#dashboardName').textContent = username;
   $('#dashboardEmail').textContent = user.email || '';
   $('#lastLogin').textContent = new Date(user.last_sign_in_at || Date.now()).toLocaleString('ru-RU');
+  loadMyCloud();
 }
 
 async function initializeAuth() {
@@ -211,7 +367,9 @@ $$('[data-market-tab]').forEach((button) => button.addEventListener('click', () 
 }));
 $('#marketSearch').addEventListener('input', renderMarket);
 $('#marketRefresh').addEventListener('click', loadMarket);
+$('#connectFolderButton').addEventListener('click', connectInstallFolder);
 $('#uploadMarketButton').addEventListener('click', () => { if (!currentUser) return openAuth('login'); $('#uploadModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; });
+$('#cloudUploadButton').addEventListener('click', () => { if (!currentUser) return openAuth('login'); $('#uploadModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; });
 $('#uploadClose').addEventListener('click', () => { $('#uploadModal').classList.add('hidden'); document.body.style.overflow = ''; });
 $('#uploadModal').addEventListener('click', (event) => { if (event.target.id === 'uploadModal') $('#uploadClose').click(); });
 $('#marketUploadForm').addEventListener('submit', async (event) => {
@@ -225,7 +383,9 @@ $('#marketUploadForm').addEventListener('submit', async (event) => {
   const path = `${currentUser.id}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
   const upload = await supabase.storage.from('market').upload(path, file, { upsert: false });
   if (upload.error) { status.textContent = upload.error.message; return; }
-  const saved = await supabase.from('market_items').insert({ user_id: currentUser.id, title: form.get('title'), description: form.get('description'), kind, storage_path: path, file_name: file.name, file_size: file.size });
+  const saved = await supabase.from('market_items').insert({ user_id: currentUser.id, title: form.get('title'), description: form.get('description'), kind, storage_path: path, file_name: file.name, file_size: file.size, published: form.get('published') === 'on' });
   if (saved.error) { await supabase.storage.from('market').remove([path]); status.textContent = saved.error.message; return; }
-  event.currentTarget.reset(); $('#uploadClose').click(); marketKind = kind; await loadMarket(); showToast('Материал загружен в облако');
+  event.currentTarget.reset(); $('#uploadClose').click(); marketKind = kind; await Promise.all([loadMarket(), loadMyCloud()]); showToast('Материал загружен в облако');
 });
+
+restoreDirectory();

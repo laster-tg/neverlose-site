@@ -93,9 +93,9 @@
         <div class="market-toolbar">
           <div class="market-tabs" role="tablist"><button class="active" data-market-tab="config">Конфиги</button><button data-market-tab="lua">Lua</button></div>
           <label class="market-search"><span>⌕</span><input id="marketSearch" type="search" placeholder="Поиск по маркету" /></label>
-          <button class="small-cta" id="uploadMarketButton" type="button">Загрузить</button>
+          <div class="market-actions"><button class="folder-button" id="connectFolderButton" type="button">Подключить NL Cloud</button><button class="small-cta" id="uploadMarketButton" type="button">Загрузить</button></div>
         </div>
-        <div class="market-meta"><span id="marketCount">0 материалов</span><button id="marketRefresh" type="button">Обновить</button></div>
+        <div class="market-meta"><span id="marketCount">0 материалов</span><span class="folder-status" id="folderStatus">Папка установки не выбрана</span><button id="marketRefresh" type="button">Обновить</button></div>
         <div class="market-grid" id="marketGrid" aria-live="polite"></div>
         <div class="market-empty hidden" id="marketEmpty"><strong>Здесь пока пусто</strong><span>Загрузите первый материал сообщества.</span></div>
       </div>
@@ -120,6 +120,12 @@
         <div class="dashboard-content">
           <div class="dashboard-heading"><div><span>ЛИЧНЫЙ КАБИНЕТ</span><h1>Добро пожаловать</h1></div><span class="status-pill">● Аккаунт активен</span></div>
           <div class="stat-grid"><article><span>Подписка</span><strong>Не активна</strong><button data-product="CS2">Выбрать продукт</button></article><article><span>HWID</span><strong id="hwidStatus">Не привязан</strong><button id="resetHwidButton">Сбросить HWID</button></article><article><span>Безопасность</span><strong>Email подтверждён</strong><button id="resetPasswordButton">Сменить пароль</button></article></div>
+          <section class="cloud-panel">
+            <div class="cloud-heading"><div><span>NL CLOUD</span><h2>Мои конфиги и Lua</h2></div><button class="small-cta" id="cloudUploadButton" type="button">Загрузить файл</button></div>
+            <div class="cloud-summary"><span id="cloudCount">0 файлов</span><span id="cloudUsage">0 Б использовано</span></div>
+            <div class="cloud-list" id="cloudList"></div>
+            <div class="cloud-empty" id="cloudEmpty">Ваше облако пока пусто. Приватные файлы видны только вам.</div>
+          </section>
           <section class="activity-panel"><h2>Последние действия</h2><div class="activity-row"><i></i><div><strong>Вход в аккаунт</strong><span id="lastLogin">Только что</span></div></div></section>
         </div>
       </div>
@@ -177,6 +183,7 @@
       <label>Описание<textarea name="description" required minlength="3" maxlength="240" placeholder="Кратко опишите материал"></textarea></label>
       <label>Тип<select name="kind"><option value="config">Конфиг</option><option value="lua">Lua</option></select></label>
       <label>Файл<input name="file" type="file" required accept=".cfg,.json,.txt,.lua" /></label>
+      <label class="publish-check"><input name="published" type="checkbox" checked /><span><strong>Опубликовать в Market</strong><small>Выключите, чтобы сохранить файл только в личном облаке.</small></span></label>
       <button class="submit-button" type="submit">ЗАГРУЗИТЬ В ОБЛАКО</button>
       <div class="form-message" id="uploadMessage" aria-live="polite"></div>
     </form>
